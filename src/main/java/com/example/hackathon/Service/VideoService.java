@@ -1,5 +1,6 @@
 package com.example.hackathon.Service;
 
+import com.example.hackathon.Util.CommonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -45,4 +46,18 @@ public class VideoService {
         }
         return null;
     }
+    public String saveVideoInLocal(InputStream videoSaveStream,String fileName) throws Exception{
+        String resPath=CommonUtil.videoSavePath+"/"+fileName;
+        File saveVideoFile=new File(resPath);
+        OutputStream out=new FileOutputStream(saveVideoFile);
+        byte[] buffer = new byte[1024 * 1024];
+        int length;
+        while ((length = videoSaveStream.read(buffer)) > 0) {
+            out.write(buffer, 0, length);
+        }
+        videoSaveStream.close();
+        out.close();
+        return resPath;
+    }
 }
+

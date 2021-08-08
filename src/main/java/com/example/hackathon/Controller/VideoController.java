@@ -1,7 +1,9 @@
 package com.example.hackathon.Controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.example.hackathon.Service.AudioService;
 import com.example.hackathon.Service.QiniuyunService;
+import com.example.hackathon.Service.VideoService;
 import com.example.hackathon.Util.CommonUtil;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
@@ -30,6 +32,12 @@ public class VideoController {
     @Autowired
     QiniuyunService qiniuyunService;
 
+    @Autowired
+    VideoService videoService;
+
+    @Autowired
+    AudioService audioService;
+
     @RequestMapping("/upload")
     @ResponseBody
     public String upload(
@@ -37,18 +45,11 @@ public class VideoController {
         Frame frame = null;
         try {
             Java2DFrameConverter java2DFrameConverter = new Java2DFrameConverter();
-            InputStream videoSave=file.getInputStream();
-            InputStream next=file.getInputStream();
-            File saveVideoFile=new File(CommonUtil.videoSavePath+"/"+file.getOriginalFilename());
-            OutputStream out=new FileOutputStream(saveVideoFile);
-            byte[] buffer = new byte[1024 * 1024];
-            int length;
-            while ((length = videoSave.read(buffer)) > 0) {
-                out.write(buffer, 0, length);
-            }
-            videoSave.close();
-            out.close();
-            FFmpegFrameGrabber fFmpegFrameGrabber = new FFmpegFrameGrabber(next);
+            InputStream videoSaveStream=file.getInputStream();
+            InputStream getFrameStream=file.getInputStream();
+            String videoLocalPath=videoService.saveVideoInLocal(videoSaveStream,file.getOriginalFilename());
+            audioService.callPythonAudioProcess(videoLocalPath);
+            FFmpegFrameGrabber fFmpegFrameGrabber = new FFmpegFrameGrabber(getFrameStream);
             fFmpegFrameGrabber.start();
             int frameSum = fFmpegFrameGrabber.getLengthInFrames();
             System.out.println("视频的总帧数是" + frameSum);
@@ -115,6 +116,10 @@ public class VideoController {
             logger.info("远程接口调用结束.");
         }
         return CommonUtil.getJsonString(100);
+    }
+    @RequestMapping("/index")
+    public String index(){
+        return "index";
     }
 
 }

@@ -19,7 +19,7 @@ public class AudioService {
 
     public Logger logger = LoggerFactory.getLogger(VideoService.class);
 
-    public static Object callPythonAudioProcess(String videoPath) {
+    public Object callPythonAudioProcess(String videoPath) {
         // 访问服务进程的套接字
         Socket socket = null;
         try {
@@ -58,9 +58,5 @@ public class AudioService {
         return null;
     }
 
-    public static void main(String[] args) {
-        Object s=callPythonAudioProcess("data/test3.mp4");
-        System.out.println(s);
-    }
 }
 
